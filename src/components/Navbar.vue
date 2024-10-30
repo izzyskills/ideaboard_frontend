@@ -6,6 +6,8 @@ import DarkMode from "@/components/DarkMode.vue";
 import MenuIcon from "@/components/icons/MenuIcon.vue";
 import MountainIcon from "@/components/icons/MountainIcon.vue";
 import { ref } from "vue";
+import { Input } from "./ui/input";
+import { SearchIcon } from "lucide-vue-next";
 const isLoggedIn = ref(false);
 const handleLogout = async () => {
   try {
@@ -65,32 +67,31 @@ const handleLogout = async () => {
       <MountainIcon class="h-6 w-6" />
       <span class="">Acme Inc</span>
     </RouterLink>
-    <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
-      <Button @click="handleLogout" variant="destructive" size="sm">
-        {{ logout.isLoading ? "Logging out..." : "Logout" }}
+    <!-- serach bar -->
+    <nav class="w-3/5 hidden lg:flex">
+      <Input
+        type="text"
+        placeholder="Search..."
+        class="w-full h-9 px-4 rounded-md bg-popover text-popover-foreground"
+      />
+      <Button variant="ghost" size="icon">
+        <SearchIcon class="h-5 w-5 -ml-20 mb-1" />
       </Button>
       <DarkMode />
     </nav>
+    <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
+      <DarkMode />
+      <Button @click="handleLogout" variant="destructive" size="sm">
+        {{ logout.isLoading ? "Logging out..." : "Logout" }}
+      </Button>
+    </nav>
     <nav v-else class="ml-auto hidden lg:flex gap-6">
-      <RouterLink
-        to="#"
-        class="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-popover hover:text-popover-foreground focus:bg-popover focus:text-popover-foreground data-[active]:bg-accent-foreground/50 data-[state=open]:bg-accent-foreground/50"
-      >
-        Home
-      </RouterLink>
-      <RouterLink
-        to="#"
-        class="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-popover hover:text-popover-foreground focus:bg-popover focus:text-popover-foreground data-[active]:bg-accent-foreground/50 data-[state=open]:bg-accent-foreground/50"
-      >
-        About
-      </RouterLink>
       <RouterLink to="/login">
         <Button variant="outline" size="sm"> Login </Button>
       </RouterLink>
       <RouterLink to="/signup">
         <Button size="sm"> Register </Button>
       </RouterLink>
-      <DarkMode />
     </nav>
   </header>
 </template>
