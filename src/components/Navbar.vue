@@ -8,7 +8,8 @@ import MountainIcon from "@/components/icons/MountainIcon.vue";
 import { ref } from "vue";
 import { Input } from "./ui/input";
 import { MagnifyingGlassIcon } from "@radix-icons/vue";
-const isLoggedIn = ref(false);
+import CreateIdeaForm from "./Forms/CreateIdeaForm.vue";
+const isLoggedIn = ref(true);
 const handleLogout = async () => {
   try {
     // await logout.mutateAsync();
@@ -35,7 +36,7 @@ const handleLogout = async () => {
         </RouterLink>
         <div v-if="isLoggedIn" class="grid gap-2 py-6">
           <Button @click="handleLogout" variant="destructive" size="sm">
-            {{ logout.isLoading ? "Logging out..." : "Logout" }}
+            Logout
           </Button>
           <DarkMode />
         </div>
@@ -63,9 +64,11 @@ const handleLogout = async () => {
         <DarkMode />
       </SheetContent>
     </Sheet>
-    <RouterLink to="#" class="mr-6 hidden lg:flex gap-2">
-      <MountainIcon class="h-6 w-6" />
-      <span class="">Idea Board</span>
+    <RouterLink to="#" class="flex items-center">
+      <div class="lg:inline-flex min-w-40 gap-2 mr-6">
+        <MountainIcon class="h-6 w-6" />
+        <span class="">Idea Board</span>
+      </div>
     </RouterLink>
     <!-- serach bar -->
     <div class="flex w-full content-between">
@@ -86,8 +89,9 @@ const handleLogout = async () => {
         <DarkMode />
       </nav>
       <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
+        <CreateIdeaForm />
         <Button @click="handleLogout" variant="destructive" size="sm">
-          {{ logout.isLoading ? "Logging out..." : "Logout" }}
+          Logout
         </Button>
       </nav>
       <nav v-else class="ml-auto hidden lg:flex gap-6">

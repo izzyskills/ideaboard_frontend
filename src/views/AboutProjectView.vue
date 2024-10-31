@@ -1,7 +1,16 @@
 <script setup>
-import { ref, reactive } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
-
+import ProjectDescriptionCard from "@/components/cards/ProjectDescriptionCard.vue";
+import ProjectForm from "@/components/Forms/ProjectForm.vue";
+import SortButton from "@/components/SortButton.vue";
+import { reactive, ref } from "vue";
+const project = ref({
+  id: "43500517-a0a4-4bcf-be5b-19863b496e55",
+  project_name: "Ginuid api",
+  description:
+    "Ginuid is a platform that allows users to generate unique IDs for their projects.",
+  open_soure_link: "https://github.com/izzyskills/AIConferencing",
+});
 const ideas = ref([
   {
     id: 1,
@@ -22,7 +31,7 @@ const ideas = ref([
     downvotes: 2,
     comments: [],
     author: "John Doe",
-    project_name: "Electora",
+    project_name: "Ginuid api",
     project_id: "6e4e7280-7da2-4a36-b21b-50bde4f6b24e",
   },
   {
@@ -33,7 +42,7 @@ const ideas = ref([
     downvotes: 3,
     comments: [],
     author: "Jane Street",
-    project_name: "Fast API",
+    project_name: "Ginuid api",
     project_id: "9e5d6a7e-5ba8-4301-b76d-d8194753d5e2",
   },
 ]);
@@ -57,8 +66,16 @@ const handleAddComment = (id) => {
 </script>
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-6">Ideas Board</h1>
-    <div class="space-y-4">
+    <ProjectDescriptionCard
+      :id="project.id"
+      :project_name="project.project_name"
+      :description="project.description"
+      :open_soure_link="project.open_soure_link"
+    />
+    <div class="flex">
+      <SortButton />
+    </div>
+    <div class="spacye-y-4">
       <IdeaCard
         v-for="idea in ideas"
         :key="idea.id"
