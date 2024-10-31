@@ -7,7 +7,7 @@ import MenuIcon from "@/components/icons/MenuIcon.vue";
 import MountainIcon from "@/components/icons/MountainIcon.vue";
 import { ref } from "vue";
 import { Input } from "./ui/input";
-import { SearchIcon } from "lucide-vue-next";
+import { MagnifyingGlassIcon } from "@radix-icons/vue";
 const isLoggedIn = ref(false);
 const handleLogout = async () => {
   try {
@@ -65,33 +65,39 @@ const handleLogout = async () => {
     </Sheet>
     <RouterLink to="#" class="mr-6 hidden lg:flex gap-2">
       <MountainIcon class="h-6 w-6" />
-      <span class="">Acme Inc</span>
+      <span class="">Idea Board</span>
     </RouterLink>
     <!-- serach bar -->
-    <nav class="w-3/5 hidden lg:flex">
-      <Input
-        type="text"
-        placeholder="Search..."
-        class="w-full h-9 px-4 rounded-md bg-popover text-popover-foreground"
-      />
-      <Button variant="ghost" size="icon">
-        <SearchIcon class="h-5 w-5 -ml-20 mb-1" />
-      </Button>
-      <DarkMode />
-    </nav>
-    <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
-      <DarkMode />
-      <Button @click="handleLogout" variant="destructive" size="sm">
-        {{ logout.isLoading ? "Logging out..." : "Logout" }}
-      </Button>
-    </nav>
-    <nav v-else class="ml-auto hidden lg:flex gap-6">
-      <RouterLink to="/login">
-        <Button variant="outline" size="sm"> Login </Button>
-      </RouterLink>
-      <RouterLink to="/signup">
-        <Button size="sm"> Register </Button>
-      </RouterLink>
-    </nav>
+    <div class="flex w-full content-between">
+      <nav class="w-3/5 hidden gap-x-28 lg:flex">
+        <div class="relative w-full items-center">
+          <Input
+            id="search"
+            type="text"
+            placeholder="Search..."
+            class="pl-10"
+          />
+          <span
+            class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
+          >
+            <MagnifyingGlassIcon class="size-6 text-muted-foreground" />
+          </span>
+        </div>
+        <DarkMode />
+      </nav>
+      <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
+        <Button @click="handleLogout" variant="destructive" size="sm">
+          {{ logout.isLoading ? "Logging out..." : "Logout" }}
+        </Button>
+      </nav>
+      <nav v-else class="ml-auto hidden lg:flex gap-6">
+        <RouterLink to="/login">
+          <Button variant="outline" size="sm"> Login </Button>
+        </RouterLink>
+        <RouterLink to="/signup">
+          <Button size="sm"> Register </Button>
+        </RouterLink>
+      </nav>
+    </div>
   </header>
 </template>
