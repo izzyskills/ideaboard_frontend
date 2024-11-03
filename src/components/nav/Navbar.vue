@@ -1,18 +1,36 @@
 <script setup>
+import { ref, watch } from "vue";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { RouterLink } from "vue-router";
-import DarkMode from "@/components/DarkMode.vue";
+import DarkMode from "@/components/nav/DarkMode.vue";
 import MenuIcon from "@/components/icons/MenuIcon.vue";
 import MountainIcon from "@/components/icons/MountainIcon.vue";
-import { ref } from "vue";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@radix-icons/vue";
-import CreateIdeaForm from "./Forms/CreateIdeaForm.vue";
-const isLoggedIn = ref(true);
+import CreateIdeaForm from "@/components/Forms/CreateIdeaForm.vue";
+import { useAuth } from "@/composables/useAuth";
+import { useLogout } from "@/composables/requests";
+import { Loader2 } from "lucide-vue-next";
+import { useRouter } from "vue-router";
+import debounce from "lodash/debounce";
+
+const searchText = ref("");
+const router = useRouter();
+
+const updateQuery = debounce((text) => {
+  router.push({ query: { text } });
+  // Call your API query function here if needed
+}, 500); // Adjust the debounce delay as needed
+
+watch(searchText, (newText) => {
+  updateQuery(newText);
+});
+const { isLoggedIn } = useAuth();
+const { logout } = useLogout();
 const handleLogout = async () => {
   try {
-    // await logout.mutateAsync();
+    await logout.mutateAsync();
     console.log("Logging out...");
   } catch (error) {
     console.error(error);
@@ -30,13 +48,17 @@ const handleLogout = async () => {
         </Button>
       </SheetTrigger>
       <SheetContent side="left">
-        <RouterLink to="#" class="mr-6 hidden lg:flex">
+        <RouterLink to="/" class="mr-6 hidden lg:flex">
           <MountainIcon class="h-6 w-6" />
           <span class="sr-only">Acme Inc</span>
         </RouterLink>
         <div v-if="isLoggedIn" class="grid gap-2 py-6">
           <Button @click="handleLogout" variant="destructive" size="sm">
-            Logout
+            <Loader2
+              v-if="logout.isLoading"
+              class="mr-2 h-4 w-4 animate-spin"
+            />
+            {{ logout.isLoading ? "Logging out..." : "Logout" }}
           </Button>
           <DarkMode />
         </div>
@@ -64,7 +86,7 @@ const handleLogout = async () => {
         <DarkMode />
       </SheetContent>
     </Sheet>
-    <RouterLink to="#" class="flex items-center">
+    <RouterLink to="/" class="flex items-center">
       <div class="lg:inline-flex min-w-40 gap-2 mr-6">
         <MountainIcon class="h-6 w-6" />
         <span class="">Idea Board</span>
@@ -77,6 +99,7 @@ const handleLogout = async () => {
           <Input
             id="search"
             type="text"
+            v-model="searchText"
             placeholder="Search..."
             class="pl-10"
           />
@@ -91,7 +114,8 @@ const handleLogout = async () => {
       <nav v-if="isLoggedIn" class="ml-auto hidden lg:flex gap-6">
         <CreateIdeaForm />
         <Button @click="handleLogout" variant="destructive" size="sm">
-          Logout
+          <Loader2 v-if="logout.isLoading" class="mr-2 h-4 w-4 animate-spin" />
+          {{ logout.isLoading ? "Logging out..." : "Logout" }}
         </Button>
       </nav>
       <nav v-else class="ml-auto hidden lg:flex gap-6">

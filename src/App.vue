@@ -1,7 +1,6 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
-import DarkMode from "./components/DarkMode.vue";
-import Navbar from "./components/Navbar.vue";
+import { RouterView } from "vue-router";
+import Navbar from "./components/nav/Navbar.vue";
 import { VueQueryDevtools } from "@tanstack/vue-query-devtools";
 </script>
 <template>

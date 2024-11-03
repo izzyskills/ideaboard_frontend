@@ -22,17 +22,6 @@ import { RouterLink } from "vue-router";
   <div
     class="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-2"
   >
-    <RouterLink
-      to="/login"
-      :class="
-        cn(
-          buttonVariants({ variant: 'ghost' }),
-          'absolute right-4 top-4 md:right-8 md:top-8',
-        )
-      "
-    >
-      Login
-    </RouterLink>
     <div
       class="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex"
     >

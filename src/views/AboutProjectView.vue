@@ -1,8 +1,9 @@
 <script setup>
 import IdeaCard from "@/components/cards/IdeaCard.vue";
 import ProjectDescriptionCard from "@/components/cards/ProjectDescriptionCard.vue";
-import ProjectForm from "@/components/Forms/ProjectForm.vue";
-import SortButton from "@/components/SortButton.vue";
+import CategorySelectionForm from "@/components/Forms/CategorySelectionForm.vue";
+import SortButton from "@/components/filters/SortButton.vue";
+import { Separator } from "@/components/ui/separator";
 import { reactive, ref } from "vue";
 const project = ref({
   id: "43500517-a0a4-4bcf-be5b-19863b496e55",
@@ -72,9 +73,11 @@ const handleAddComment = (id) => {
       :description="project.description"
       :open_soure_link="project.open_soure_link"
     />
-    <div class="flex">
+    <div class="flex mb-4 gap-4">
+      <CategorySelectionForm />
       <SortButton />
     </div>
+    <Separator class="mb-4" />
     <div class="spacye-y-4">
       <IdeaCard
         v-for="idea in ideas"

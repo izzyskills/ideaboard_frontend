@@ -1,72 +1,85 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
+import { useGetIdeas } from "@/composables/requests";
+import { useRoute } from "vue-router";
+import { Loader2 } from "lucide-vue-next";
 
-const ideas = ref([
-  {
-    id: 1,
-    title: "Create a mobile app",
-    body: "We should develop a mobile app to reach more users on-the-go.",
-    upvotes: 30,
-    downvotes: 5,
-    author: "Hunter Johnson",
-    comments: [],
-    project_name: "Ginuid api",
-    project_id: "43500517-a0a4-4bcf-be5b-19863b496e55",
-  },
-  {
-    id: 2,
-    title: "Implement dark mode",
-    body: "Adding a dark mode option would improve user experience, especially for night-time browsing.",
-    upvotes: 9,
-    downvotes: 2,
-    comments: [],
-    author: "John Doe",
-    project_name: "Electora",
-    project_id: "6e4e7280-7da2-4a36-b21b-50bde4f6b24e",
-  },
-  {
-    id: 3,
-    title: "Add a new payment gateway",
-    body: "We should add a new payment gateway to support more payment options for our users.",
-    upvotes: 15,
-    downvotes: 3,
-    comments: [],
-    author: "Jane Street",
-    project_name: "Fast API",
-    project_id: "9e5d6a7e-5ba8-4301-b76d-d8194753d5e2",
-  },
-]);
+const route = useRoute();
+const searchText = ref(route.query.text || "");
+const { ideas, error } = useGetIdeas();
 const newComments = reactive({});
+
+// Compute flattened ideas using computed property
+const displayedIdeas = ref([]);
 const handleVote = (id, isUpvote) => {
-  const idea = ideas.value.find((idea) => idea.id === id);
+  const idea = displayedIdeas.value.find((idea) => idea.id === id);
   if (idea) {
-    isUpvote ? idea.upvotes++ : idea.downvotes++;
+    if (isUpvote) {
+      idea.upvotes++;
+    } else {
+      idea.downvotes++;
+    }
   }
 };
 
 const handleAddComment = (id) => {
-  if (newComments[id]?.trim()) {
-    const idea = ideas.value.find((idea) => idea.id === id);
-    if (idea) {
-      idea.comments.push(newComments[id]);
-      newComments[id] = "";
-    }
-  }
+  console.log("Adding comment for idea:", id);
 };
+
+// Watch for route changes
+watch(
+  () => route.query,
+  (newQuery) => {
+    searchText.value = newQuery.text || "";
+  },
+  { deep: true },
+);
+
+// Debug watcher for ideas data
+watch(
+  () => ideas.data,
+  (newData) => {
+    displayedIdeas.value = newData.value.pages[0].data;
+  },
+  { deep: true },
+);
 </script>
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-3xl font-bold mb-6">Ideas Board</h1>
-    <div class="space-y-4">
-      <IdeaCard
-        v-for="idea in ideas"
-        :key="idea.id"
-        :idea="idea"
-        :handle-vote="handleVote"
-        :handle-add-comment="handleAddComment"
-        :new-comments="newComments"
-      />
+
+    <div v-if="error" class="text-red-500">{{ error.message }}</div>
+
+    <!-- Show ideas when data is available -->
+    <template v-if="ideas.data">
+      <div class="space-y-4">
+        <IdeaCard
+          v-for="idea in displayedIdeas"
+          :key="idea.id"
+          :idea="idea"
+          :handle-vote="handleVote"
+          :handle-add-comment="handleAddComment"
+          :new-comments="newComments"
+        />
+      </div>
+
+      <button
+        v-if="ideas.hasNextPage"
+        @click="() => ideas.fetchNextPage()"
+        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        :disabled="ideas.isFetchingNextPage"
+      >
+        {{ ideas.isFetchingNextPage ? "Loading more..." : "Load More" }}
+      </button>
+    </template>
+
+    <!-- Show loader for initial load only -->
+    <div
+      v-if="ideas.isLoading && !ideas.data"
+      class="flex w-full justify-center items-center text-center"
+    >
+      <Loader2 class="h-10 w-10 animate-spin" />
     </div>
   </div>
 </template>
