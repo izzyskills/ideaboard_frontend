@@ -9,7 +9,7 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useAxiosPrivate } from "@/composables/useAxiosPrivate";
 import { useUrlSearchParams } from "@vueuse/core";
 
@@ -139,13 +139,16 @@ function useLogout() {
 function useGetIdeas() {
   const error = ref(null);
   const search = useUrlSearchParams();
-  watch(
-    search,
-    (newSearch) => {
-      console.log("Search params changed:", newSearch);
-    },
-    { immediate: true },
-  );
+  const searchParams = computed(() => {
+    const params = new URLSearchParams();
+    // Add all search params
+    Object.entries(search).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    params.set("limit", "5");
+    return params;
+  });
+
   const getIdeas = useInfiniteQuery({
     queryKey: ["ideas", search], // Add search to queryKey to react to changes
     queryFn: async ({ pageParam = null }) => {
@@ -187,7 +190,16 @@ function useGetIdeas() {
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
+  watch(
+    searchParams,
+    () => {
+      console.log("Search params changed, refetching...");
+      getIdeas.refetch();
+    },
+    { deep: true },
+  );
 
   return {
     ideas: getIdeas,

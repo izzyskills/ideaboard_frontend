@@ -40,7 +40,7 @@ watch(
 watch(
   () => ideas.data,
   (newData) => {
-    displayedIdeas.value = newData.value.pages[0].data;
+    displayedIdeas.value = newData.value.pages.flatMap((page) => page.data);
   },
   { deep: true },
 );
