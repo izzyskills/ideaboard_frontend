@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-vue-next";
+import { RouterLink } from "vue-router";
 defineProps({
   idea: Object,
   handleVote: Function,
@@ -20,7 +21,11 @@ defineProps({
 <template>
   <Card class="w-full">
     <CardHeader class="gap-0">
-      <CardTitle class="text-xs">{{ idea.project_name }}</CardTitle>
+      <RouterLink :to="`/project/${idea.project_id}`"
+        ><CardTitle class="text-xs">{{
+          idea.project_name
+        }}</CardTitle></RouterLink
+      >
       <CardDescription class="text-[0.7rem]">{{ idea.author }}</CardDescription>
     </CardHeader>
 

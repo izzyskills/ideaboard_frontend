@@ -12,7 +12,14 @@ const { project_name, description, id, open_soure_link } = defineProps({
     <span class="sr-only">{{ id }}</span>
     <h2 class="text-gray-800 dark:text-gray-200 text-base">
       Project Link:
-      <RouterLink class="text-primary">{{ open_soure_link }}</RouterLink>
+
+      <a
+        :href="open_soure_link"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-primary"
+        >{{ open_soure_link }}</a
+      >
     </h2>
     <p class="text-gray-700 dark:text-gray-300 text-sm">{{ description }}</p>
   </div>

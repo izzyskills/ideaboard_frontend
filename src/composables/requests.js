@@ -65,7 +65,7 @@ function useSignup() {
 
   const signup = useMutation({
     mutationFn: async (formData) => {
-      const response = await apiClient.post(`auth/signup`, formData, {
+      const response = await apiClient.post(`auth/register`, formData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -136,32 +136,27 @@ function useLogout() {
 //   })
 // }
 //
-function useGetIdeas() {
+function useGetIdeas(project_id = null) {
   const error = ref(null);
-  const search = useUrlSearchParams();
-  const searchParams = computed(() => {
-    const params = new URLSearchParams();
-    // Add all search params
-    Object.entries(search).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-    params.set("limit", "5");
-    return params;
-  });
+  const searchParams = useUrlSearchParams();
 
   const getIdeas = useInfiniteQuery({
-    queryKey: ["ideas", search], // Add search to queryKey to react to changes
+    queryKey: ["ideas", project_id, searchParams], // Add project_id and searchParams to queryKey to react to changes
     queryFn: async ({ pageParam = null }) => {
       try {
-        const params = new URLSearchParams(search);
+        const params = new URLSearchParams(searchParams);
         if (pageParam) {
           params.set("cursor", pageParam);
         }
         params.set("limit", 5);
+        if (project_id) {
+          params.set("project_id", project_id); // Include project_id in the query parameters if provided
+        }
         console.log("Making request with params:", Object.fromEntries(params));
 
         const response = await apiClient.get("/ideas", {
           params: params,
+          withCredentials: true,
         });
         console.log("Response:", response);
 
@@ -192,6 +187,7 @@ function useGetIdeas() {
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });
+
   watch(
     searchParams,
     () => {
@@ -206,5 +202,20 @@ function useGetIdeas() {
     error,
   };
 }
-
-export { useSignup, useLogin, useLogout, useGetIdeas };
+function useGetProjectByid(project_id) {
+  const error = ref(null);
+  const getProject = useQuery({
+    queryKey: ["project", project_id],
+    queryFn: async () => {
+      const res = await apiClient.get(`project/${project_id}`);
+      console.log(res.data);
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 20,
+  });
+  return {
+    project: getProject,
+    error,
+  };
+}
+export { useSignup, useLogin, useLogout, useGetIdeas, useGetProjectByid };

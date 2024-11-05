@@ -37,13 +37,6 @@ watch(
 );
 
 // Debug watcher for ideas data
-watch(
-  () => ideas.data,
-  (newData) => {
-    displayedIdeas.value = newData.value.pages.flatMap((page) => page.data);
-  },
-  { deep: true },
-);
 </script>
 <template>
   <div class="container mx-auto p-4">
@@ -52,27 +45,25 @@ watch(
     <div v-if="error" class="text-red-500">{{ error.message }}</div>
 
     <!-- Show ideas when data is available -->
-    <template v-if="ideas.data">
-      <div class="space-y-4">
-        <IdeaCard
-          v-for="idea in displayedIdeas"
-          :key="idea.id"
-          :idea="idea"
-          :handle-vote="handleVote"
-          :handle-add-comment="handleAddComment"
-          :new-comments="newComments"
-        />
-      </div>
+    <div v-if="ideas.data" class="space-y-4">
+      <IdeaCard
+        v-for="idea in ideas.data.value.pages.flatMap((page) => page.data)"
+        :key="idea.id"
+        :idea="idea"
+        :handle-vote="handleVote"
+        :handle-add-comment="handleAddComment"
+        :new-comments="newComments"
+      />
+    </div>
 
-      <button
-        v-if="ideas.hasNextPage"
-        @click="() => ideas.fetchNextPage()"
-        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        :disabled="ideas.isFetchingNextPage"
-      >
-        {{ ideas.isFetchingNextPage ? "Loading more..." : "Load More" }}
-      </button>
-    </template>
+    <button
+      v-if="ideas.hasNextPage"
+      @click="() => ideas.fetchNextPage()"
+      class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+      :disabled="ideas.isFetchingNextPage"
+    >
+      {{ ideas.isFetchingNextPage ? "Loading more..." : "Load More" }}
+    </button>
 
     <!-- Show loader for initial load only -->
     <div
