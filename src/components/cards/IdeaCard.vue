@@ -11,12 +11,18 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-vue-next";
 import { RouterLink } from "vue-router";
-defineProps({
+import { usePostLike } from "@/composables/requests";
+const { idea, handleAddComment, newComments } = defineProps({
   idea: Object,
-  handleVote: Function,
   handleAddComment: Function,
   newComments: Object,
 });
+const { postLike, error } = usePostLike(idea.id);
+const handleVote = async (isUpvote) => {
+  const formData = { is_upvote: isUpvote };
+  const res = await postLike.mutateAsync(formData);
+  console.log(res);
+};
 </script>
 <template>
   <Card class="w-full">
@@ -38,7 +44,7 @@ defineProps({
             <Button
               variant="secondary"
               class="p-2"
-              @click="handleVote(idea.id, true)"
+              @click="handleVote(true)"
               aria-label="Upvote"
             >
               <ThumbsUp class="h-4 w-4 mr-2" />
@@ -47,7 +53,7 @@ defineProps({
             <Button
               variant="secondary"
               class="p-2"
-              @click="handleVote(idea.id, false)"
+              @click="handleVote(false)"
               aria-label="Downvote"
             >
               <ThumbsDown class="h-4 w-4 mr-2" />

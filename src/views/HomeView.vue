@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
-import { useGetIdeas } from "@/composables/requests";
+import { useGetIdeas, usePostLike } from "@/composables/requests";
 import { useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
 
@@ -9,19 +9,9 @@ const route = useRoute();
 const searchText = ref(route.query.text || "");
 const { ideas, error } = useGetIdeas();
 const newComments = reactive({});
+const { postLike } = usePostLike();
 
 // Compute flattened ideas using computed property
-const displayedIdeas = ref([]);
-const handleVote = (id, isUpvote) => {
-  const idea = displayedIdeas.value.find((idea) => idea.id === id);
-  if (idea) {
-    if (isUpvote) {
-      idea.upvotes++;
-    } else {
-      idea.downvotes++;
-    }
-  }
-};
 
 const handleAddComment = (id) => {
   console.log("Adding comment for idea:", id);
@@ -35,8 +25,6 @@ watch(
   },
   { deep: true },
 );
-
-// Debug watcher for ideas data
 </script>
 <template>
   <div class="container mx-auto p-4">
@@ -45,12 +33,11 @@ watch(
     <div v-if="error" class="text-red-500">{{ error.message }}</div>
 
     <!-- Show ideas when data is available -->
-    <div v-if="ideas.data" class="space-y-4">
+    <div v-if="ideas.data.value" class="space-y-4">
       <IdeaCard
         v-for="idea in ideas.data.value.pages.flatMap((page) => page.data)"
         :key="idea.id"
         :idea="idea"
-        :handle-vote="handleVote"
         :handle-add-comment="handleAddComment"
         :new-comments="newComments"
       />

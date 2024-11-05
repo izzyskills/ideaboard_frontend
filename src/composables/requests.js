@@ -202,6 +202,31 @@ function useGetIdeas(project_id = null) {
     error,
   };
 }
+function usePostProject() {
+  const apiClientPrivate = useAxiosPrivate();
+  const error = ref(null);
+  const postProject = useMutation({
+    mutationFn: async (formData) => {
+      const res = await apiClientPrivate.post("project", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["prject", "all"]);
+    },
+    onError: (err) => {
+      err.response?.data?.error_code ||
+        "An error occurred during project creation";
+    },
+  });
+  return {
+    postProject,
+    error,
+  };
+}
 function useGetProjectByid(project_id) {
   const error = ref(null);
   const getProject = useQuery({
@@ -218,4 +243,57 @@ function useGetProjectByid(project_id) {
     error,
   };
 }
-export { useSignup, useLogin, useLogout, useGetIdeas, useGetProjectByid };
+
+function useGetVotesDetails(idea_id) {
+  const error = ref(null);
+  const { isLoggedIn } = useAuth();
+  const apiSpecialClient = isLoggedIn ? useAxiosPrivate() : apiClient;
+  const getVotesDetails = useQuery({
+    queryKey: ["votes", idea_id],
+    queryFn: async () => {
+      const res = await apiSpecialClient.get(`ideas/${idea_id}/votes`);
+      return res.data;
+    },
+  });
+  return { getVotesDetails, error };
+}
+
+function usePostLike() {
+  const error = ref(null);
+  const apiClientPrivate = useAxiosPrivate();
+  const postLike = useMutation({
+    mutationFn: async (idea_id, formData) => {
+      const res = await apiClientPrivate.post(
+        `ideas/${idea_id}/votes`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["votes", idea_id]);
+    },
+    onError: (err) => {
+      err.response?.data?.error_code || "An error occurred during signup";
+    },
+  });
+
+  return {
+    postLike,
+    error,
+  };
+}
+export {
+  useSignup,
+  useLogin,
+  useLogout,
+  useGetIdeas,
+  useGetProjectByid,
+  usePostProject,
+  useGetVotesDetails,
+  usePostLike,
+};
