@@ -31,13 +31,10 @@ const { previousProjects, setFieldValue, values } = defineProps({
   setFieldValue: Function,
   values: Object,
 });
-const projectname = ref("");
-console.log(previousProjects);
-console.log(setFieldValue);
 </script>
 
 <template>
-  <FormField name="projectname">
+  <FormField name="project_id">
     <FormItem class="flex flex-col mb-2 -mt-2">
       <FormLabel>Project Name</FormLabel>
       <Popover>
@@ -46,13 +43,18 @@ console.log(setFieldValue);
             <Button
               variant="outline"
               role="combobox"
-              :class="cn('w-40 justify-between')"
+              :class="
+                cn(
+                  'w-40 justify-between',
+                  !values.project_id && 'text-muted-foreground',
+                )
+              "
             >
               {{
-                values.projectname
+                values.project_id
                   ? previousProjects.find(
-                      (project) => project.name === values.projectname,
-                    )?.name || values.projectname
+                      (project) => project.id === values.project_id,
+                    )?.name
                   : "Select a Project"
               }}
               <CaretDownIcon class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -60,10 +62,10 @@ console.log(setFieldValue);
           </FormControl>
         </PopoverTrigger>
         <PopoverContent class="w-[10rem] p-0">
-          <Command :model-value="projectname">
+          <Command>
             <CommandInput placeholder="Select Projects..." />
             <CommandEmpty>
-              <RouterLink> Create Project </RouterLink></CommandEmpty
+              <RouterLink to="#"> Create Project </RouterLink></CommandEmpty
             >
             <CommandList>
               <CommandGroup>
@@ -73,22 +75,21 @@ console.log(setFieldValue);
                   :value="previousProject.name"
                   @select="
                     () => {
-                      setFieldValue('projectname', previousProject.name);
                       setFieldValue('project_id', previousProject.id);
                     }
                   "
                 >
-                  {{ previousProject.name }}
                   <CheckIcon
                     :class="
                       cn(
-                        'ml-auto h-4 w-4',
-                        previousProject.value == values.projectname
+                        'mr-2 h-4 w-4',
+                        previousProject.id == values.project_id
                           ? 'opacity-100'
                           : 'opacity-0',
                       )
                     "
                   />
+                  {{ previousProject.name }}
                 </CommandItem>
               </CommandGroup>
             </CommandList>

@@ -21,69 +21,109 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { idea_schema } from "./schemas";
 import { useForm } from "vee-validate";
 import ProjectForm from "./ProjectForm.vue";
 import { ref } from "vue";
 import { PlusCircledIcon } from "@radix-icons/vue";
+import { useProject } from "@/composables/useProject";
+import { useCategory } from "@/composables/useCategory";
+import { useAuth } from "@/composables/useAuth";
 
 const isLoading = ref(false);
 const formSchema = toTypedSchema(idea_schema);
+const { categories } = useCategory();
 
 const { handleSubmit, setFieldValue, values } = useForm({
   validationSchema: formSchema,
   initialValues: {
-    project_name: "",
     project_id: "",
+    category: "",
   },
 });
 
-const previousProjects = ref([
-  { name: "Ginuid api", id: "43500517-a0a4-4bcf-be5b-19863b496e55" },
-  { name: "Electora", id: "6e4e7280-7da2-4a36-b21b-50bde4f6b24e" },
-  { name: "Fast API", id: "9e5d6a7e-5ba8-4301-b76d-d8194753d5e2" },
-]);
+const open = ref(false);
+const { getUser } = useAuth();
+
+const { projects: previousProjects } = useProject();
 
 const onSubmit = handleSubmit(async (values) => {
   try {
     isLoading.value = true;
+    values.category_id = Number(values.category_id);
+    values.creator_id = getUser.value.user_id;
+
     // await createIdea.mutateAsync(values);
     console.log(values);
   } catch (error) {
     console.error(error);
   } finally {
     isLoading.value = false;
+    open.value = false;
   }
 });
 </script>
 <template>
-  <Form
-    v-slot="{ submitForm }"
-    as=""
-    keep-values
-    :validation-schema="formSchema"
-    @submit="onSubmit"
-  >
-    <Dialog>
+  <div>
+    <Dialog :open="open">
       <DialogTrigger as-child>
-        <Button class="gap-x-2">
+        <Button
+          @click="
+            () => {
+              open = true;
+            }
+          "
+          class="gap-x-2"
+        >
           <PlusCircledIcon class="" />
           Create Idea
         </Button>
       </DialogTrigger>
 
       <DialogContent class="sm:max-w-[25rem] md:min-w-[40rem] min-h-[30rem]">
-        <form @submit.prevent="handleAddIdea" class="space-y-4">
+        <form @submit.prevent="onSubmit">
           <DialogHeader>
             <DialogTitle>Submit a New Idea</DialogTitle>
           </DialogHeader>
-          <CardContent class="h-full">
+          <CardContent class="h-full mt-2">
             <ProjectForm
               :previous-projects="previousProjects"
               :set-field-value="setFieldValue"
               :values="values"
             />
+            <FormField v-slot="{ componentField }" name="category_id">
+              <FormItem>
+                <FormLabel> Category </FormLabel>
+                <Select v-bind="componentField">
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="select a category..." />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem
+                        v-for="category in categories"
+                        :key="category.value"
+                        :value="String(category.value)"
+                      >
+                        {{ category.label }}
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            </FormField>
             <FormField v-slot="{ componentField }" name="title">
               <FormItem>
                 <FormLabel> Title </FormLabel>
@@ -117,5 +157,5 @@ const onSubmit = handleSubmit(async (values) => {
         </form>
       </DialogContent>
     </Dialog>
-  </Form>
+  </div>
 </template>

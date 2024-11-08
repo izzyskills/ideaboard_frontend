@@ -22,35 +22,38 @@ import {
 import { computed, ref } from "vue";
 
 const categories = [
-  { value: "frontend", label: "Frontend" },
-  { value: "backend", label: "Backend" },
-  { value: "full_stack", label: "Full Stack" },
-  { value: "ui_ux", label: "UI/UX" },
-  { value: "devops", label: "DevOps" },
-  { value: "mobile_development", label: "Mobile Development" },
-  { value: "data_science", label: "Data Science" },
-  { value: "ai_ml", label: "Artificial Intelligence / Machine Learning" },
-  { value: "game_development", label: "Game Development" },
-  { value: "security", label: "Security" },
-  { value: "iot", label: "Internet of Things (IoT)" },
-  { value: "cloud_computing", label: "Cloud Computing" },
-  { value: "blockchain", label: "Blockchain" },
-  { value: "networking", label: "Networking" },
-  { value: "database_management", label: "Database Management" },
-  { value: "embedded_systems", label: "Embedded Systems" },
-  { value: "automation", label: "Automation" },
-  { value: "testing", label: "Testing" },
-  { value: "documentation", label: "Documentation" },
-  { value: "tools_utilities", label: "Tools and Utilities" },
+  { value: 1, label: "AI/ML" },
+  { value: 2, label: "FrontEnd" },
+  { value: 3, label: "Backend" },
+  { value: 4, label: "FullStack" },
+  { value: 5, label: "Mobile" },
+  { value: 6, label: "GameDev" },
+  { value: 7, label: "DevOps" },
+  { value: 8, label: "Cloud" },
+  { value: 9, label: "DataScience" },
+  { value: 10, label: "Security" },
+  { value: 11, label: "IoT" },
+  { value: 12, label: "Blockchain" },
+  { value: 13, label: "AR/VR" },
+  { value: 14, label: "Other" },
 ];
 
 const modelValue = ref([]);
 const open = ref(false);
 const searchTerm = ref("");
+const selectedIds = ref([]);
 
 const filteredFrameworks = computed(() =>
   categories.filter((i) => !modelValue.value.includes(i.label)),
 );
+
+const selectedCategories = computed(() =>
+  categories
+    .filter((i) => modelValue.value.includes(i.label))
+    .map((i) => i.value),
+);
+
+console.log(filteredFrameworks);
 </script>
 
 <template>

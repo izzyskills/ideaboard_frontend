@@ -32,8 +32,11 @@ const idea_schema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters")
     .max(300, "Maximum of 300 characters"),
-  projectname: z.string().min(2, "Name must be at least 2 characters"),
-  project_id: z.union([z.string().uuid(), z.literal(-1)]),
+  category_id: z.string().refine((val) => {
+    const id = Number(val);
+    return id >= 1 && id <= 14;
+  }, "Invalid category id"),
+  project_id: z.string().uuid("Invalid project id"),
 });
 
 export { login_schema, signup_schema, idea_schema };
