@@ -12,6 +12,8 @@ import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useAxiosPrivate } from "@/composables/useAxiosPrivate";
 import { useUrlSearchParams } from "@vueuse/core";
+import { useProjectStore } from "@/stores/projecState";
+import { useProject } from "./useProject";
 
 function useLogin() {
   const router = useRouter();
@@ -217,6 +219,32 @@ function useGetIdeabyId(id) {
     error,
   };
 }
+function usePostIdea() {
+  const apiClientPrivate = useAxiosPrivate();
+  const error = ref(null);
+  const postIdea = useMutation({
+    mutationFn: async (formData) => {
+      const res = await apiClientPrivate.post("ideas", formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["ideas"]);
+    },
+    onError: (err) => {
+      err.response?.data?.error_code ||
+        "An error occurred during idea creation";
+    },
+  });
+  return {
+    postIdea,
+    error,
+  };
+}
+
 function usePostProject() {
   const apiClientPrivate = useAxiosPrivate();
   const error = ref(null);
@@ -245,10 +273,12 @@ function usePostProject() {
 
 function useGetAllProjects() {
   const error = ref(null);
+  const { setProjects } = useProject();
   const getAllProjects = useQuery({
     queryKey: ["project", "all"],
     queryFn: async () => {
       const res = await apiClient.get("project/");
+      setProjects(res.data);
       return res.data;
     },
     staleTime: 1000 * 60 * 1000,
@@ -324,6 +354,7 @@ export {
   useLogout,
   useGetIdeas,
   useGetIdeabyId,
+  usePostIdea,
   useGetAllProjects,
   useGetProjectByid,
   usePostProject,
