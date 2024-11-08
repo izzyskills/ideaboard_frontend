@@ -80,13 +80,7 @@ function useSignup() {
       }
       queryClient.invalidateQueries("userdata");
       // Note: You'll need to implement a toast notification system for Vue
-      // toast.success("You have been successfully registered.");
-      router.push("/login");
-    },
-    onError: (err) => {
-      console.error("Signup error:", err);
-      error.value =
-        err.response?.data?.error_code || "An error occurred during signup";
+      err.response?.data?.error_code || "An error occurred during signup";
     },
   });
 
@@ -124,18 +118,9 @@ function useLogout() {
   return { error, logout };
 }
 
-// function usePostIdea(){
-//   const error = ref(null)
-//   const apiClientPrivate = useAxiosPrivate():
-//   const postIdea = useMutation({
-//       try {
-//
-//       } catch () {
-//
-//       }
-//   })
-// }
-//
+//TODO: fix when a text is entered in the search bar and the results are not displayed
+//TODO: triggering get new ideas fetch if there is a next cursor and the user scrolls to the bottom of the page
+
 function useGetIdeas(project_id = null) {
   const error = ref(null);
   const searchParams = useUrlSearchParams();
@@ -202,6 +187,36 @@ function useGetIdeas(project_id = null) {
     error,
   };
 }
+
+function useGetIdeabyId(id) {
+  const error = ref(null);
+  const getIdeabyId = useQuery({
+    queryKey: ["idea", id],
+    queryFn: async () => {
+      const res = await apiClient.get(`ideas/${id}`);
+      const idea = res.data;
+      console.log(idea);
+      const mappedData = {
+        id: idea.id,
+        title: idea.title,
+        body: idea.description,
+        upvotes: idea.votes.upvotes,
+        downvotes: idea.votes.downvotes,
+        author: idea.creator_username, // Assuming creator_id is the author
+        comments: [], // Assuming comments are not included in the response
+        project_name: idea.project_name,
+        project_id: idea.project_id,
+      };
+      console.log(mappedData);
+      return { data: mappedData };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+  return {
+    getIdeabyId,
+    error,
+  };
+}
 function usePostProject() {
   const apiClientPrivate = useAxiosPrivate();
   const error = ref(null);
@@ -224,6 +239,22 @@ function usePostProject() {
   });
   return {
     postProject,
+    error,
+  };
+}
+
+function useGetAllProjects() {
+  const error = ref(null);
+  const getAllProjects = useQuery({
+    queryKey: ["project", "all"],
+    queryFn: async () => {
+      const res = await apiClient.get("project/");
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 1000,
+  });
+  return {
+    getAllProjects,
     error,
   };
 }
@@ -258,11 +289,11 @@ function useGetVotesDetails(idea_id) {
   return { getVotesDetails, error };
 }
 
-function usePostLike() {
+function usePostLike(idea_id) {
   const error = ref(null);
   const apiClientPrivate = useAxiosPrivate();
   const postLike = useMutation({
-    mutationFn: async (idea_id, formData) => {
+    mutationFn: async (formData) => {
       const res = await apiClientPrivate.post(
         `ideas/${idea_id}/votes`,
         formData,
@@ -292,6 +323,8 @@ export {
   useLogin,
   useLogout,
   useGetIdeas,
+  useGetIdeabyId,
+  useGetAllProjects,
   useGetProjectByid,
   usePostProject,
   useGetVotesDetails,

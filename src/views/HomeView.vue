@@ -1,7 +1,11 @@
 <script setup>
 import { ref, reactive, computed, watch } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
-import { useGetIdeas, usePostLike } from "@/composables/requests";
+import {
+  useGetAllProjects,
+  useGetIdeas,
+  usePostLike,
+} from "@/composables/requests";
 import { useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
 
@@ -10,12 +14,20 @@ const searchText = ref(route.query.text || "");
 const { ideas, error } = useGetIdeas();
 const newComments = reactive({});
 const { postLike } = usePostLike();
+const { getAllProjects } = useGetAllProjects();
 
 // Compute flattened ideas using computed property
 
 const handleAddComment = (id) => {
   console.log("Adding comment for idea:", id);
 };
+
+watch(
+  () => getAllProjects.data.value,
+  (data) => {
+    console.log(data);
+  },
+);
 
 // Watch for route changes
 watch(

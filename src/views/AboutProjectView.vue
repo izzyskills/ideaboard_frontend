@@ -47,7 +47,7 @@ const handleAddComment = (id) => {
       <SortButton />
     </div>
     <Separator class="mb-4" />
-    <div v-if="ideas.data.value" class="spacye-y-4">
+    <div v-if="ideas.data.value" class="space-y-4">
       <IdeaCard
         v-for="idea in ideas.data.value.pages.flatMap((page) => page.data)"
         :key="idea.id"

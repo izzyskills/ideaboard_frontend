@@ -1,8 +1,8 @@
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRoute } from "vue-router";
 import DarkMode from "@/components/nav/DarkMode.vue";
 import MenuIcon from "@/components/icons/MenuIcon.vue";
 import MountainIcon from "@/components/icons/MountainIcon.vue";
@@ -10,17 +10,21 @@ import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@radix-icons/vue";
 import CreateIdeaForm from "@/components/Forms/CreateIdeaForm.vue";
 import { useAuth } from "@/composables/useAuth";
-import { useLogout } from "@/composables/requests";
+import { useGetIdeas, useLogout } from "@/composables/requests";
 import { Loader2 } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 import debounce from "lodash/debounce";
 
 const searchText = ref("");
 const router = useRouter();
-
+const route = useRoute();
+const isNotLoginOrRegister = computed(() => {
+  return route.path !== "/login" && route.path !== "/register";
+});
 const updateQuery = debounce((text) => {
   router.push({ query: { text } });
   // Call your API query function here if needed
+  useGetIdeas();
 }, 500); // Adjust the debounce delay as needed
 
 watch(searchText, (newText) => {
@@ -95,7 +99,7 @@ const handleLogout = async () => {
     <!-- serach bar -->
     <div class="flex w-full content-between">
       <nav class="w-3/5 hidden gap-x-28 lg:flex">
-        <div class="relative w-full items-center">
+        <div v-if="isNotLoginOrRegister" class="relative w-full items-center">
           <Input
             id="search"
             type="text"
