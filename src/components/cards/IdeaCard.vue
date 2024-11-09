@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-vue-next";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,19 +25,16 @@ import {
 import { usePostLike } from "@/composables/requests";
 import { ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
-const { idea, handleAddComment, newComments, shouldShowComments } = defineProps(
-  {
-    idea: Object,
-    handleAddComment: Function,
-    newComments: Object,
-    shouldShowComments: {
-      type: Boolean,
-      default: true,
-    },
+import CommentForm from "../Forms/CommentForm.vue";
+const { idea, newComments, shouldShowComments } = defineProps({
+  idea: Object,
+  shouldShowComments: {
+    type: Boolean,
+    default: true,
   },
-);
+});
 const router = useRouter();
-
+const route = useRoute();
 const { postLike, error } = usePostLike(idea.id);
 const isAnimatingLike = ref(false);
 const isAnimatingDislike = ref(false);
@@ -54,6 +51,20 @@ const redirectToLogin = () => {
   const currentPath = window.location.pathname;
   router.push({ name: "login", query: { from: currentPath } });
 };
+const navigateToIdea = () => {
+  const ideaRoute = `/idea/${idea.id}`;
+  if (route.path !== ideaRoute) {
+    router.push(ideaRoute);
+  }
+};
+
+const navigateToProject = () => {
+  const projectRoute = `/project/${idea.project_id}`;
+  if (route.path !== projectRoute) {
+    router.push(projectRoute);
+  }
+};
+
 const handleVote = async (isUpvote) => {
   console.log(isLoggedIn.value);
   if (!isLoggedIn.value) {
@@ -86,76 +97,75 @@ const handleVote = async (isUpvote) => {
 };
 </script>
 <template>
-  <Card class="w-full">
-    <RouterLink :to="`/idea/${idea.id}`">
-      <CardHeader class="gap-0">
-        <RouterLink :to="`/project/${idea.project_id}`"
-          ><CardTitle class="text-xs">{{
-            idea.project_name
-          }}</CardTitle></RouterLink
-        >
-        <CardDescription class="text-[0.7rem]"
-          >Posted by {{ idea.author }}</CardDescription
-        >
-      </CardHeader>
+  <Card @click="navigateToIdea" class="w-full cursor-pointer">
+    <CardHeader class="gap-0">
+      <CardTitle
+        @click.stop="navigateToProject"
+        class="text-xs cursor-pointer"
+        >{{ idea.project_name }}</CardTitle
+      >
+      <CardDescription class="text-[0.7rem]"
+        >Posted by {{ idea.author }}</CardDescription
+      >
+    </CardHeader>
 
-      <CardContent class="">
-        <div class="flex">
-          <div class="flex-grow">
-            <h2 class="text-xl font-semibold mb-2">{{ idea.title }}</h2>
-            <p class="text-gray-600 mb-4">{{ idea.body }}</p>
-            <div class="flex flex-row items-center gap-4 mr-4 mb-4">
-              <Button
-                variant="secondary"
-                class="p-2"
-                @click="handleVote(true)"
-                aria-label="Upvote"
-              >
-                <ThumbsUp
-                  :class="`h-4 w-4 mr-2 ${votes.has_voted && votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground ' : ''} ${isAnimatingLike ? 'animate-ping' : ''}`"
-                />
-                <span class="text-xl font-bold">{{ votes.upvotes }}</span>
-              </Button>
-              <Button
-                variant="secondary"
-                class="p-2"
-                @click="handleVote(false)"
-                aria-label="Downvote"
-              >
-                <ThumbsDown
-                  :class="`h-4 w-4 mr-2 ${votes.has_voted && !votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground' : ''} ${isAnimatingDislike ? 'animate-ping' : ''}`"
-                />
-
-                <span class="text-xl font-bold">{{ votes.downvotes }}</span>
-              </Button>
-              <Button variant="secondary" class="p-2">
-                <MessageSquare class="h-4 w-4 mr-1" />
-                <span>{{ idea.comments.length }} comments</span>
-              </Button>
-            </div>
-            <Separator class="my-4" />
-            <div v-if="shouldShowComments" class="space-y-2">
-              <div
-                v-for="(comment, index) in idea.comments"
-                :key="index"
-                class="bg-secondary p-2 rounded-md"
-              >
-                {{ comment }}
-              </div>
-            </div>
-            <div class="flex gap-2 mt-4">
-              <Input
-                type="text"
-                v-model="newComments[idea.id]"
-                placeholder="Add a comment..."
-                class="flex-grow"
+    <CardContent class="">
+      <div class="flex">
+        <div class="flex-grow">
+          <h2 class="text-xl font-semibold mb-2">{{ idea.title }}</h2>
+          <p class="text-gray-600 mb-4">{{ idea.body }}</p>
+          <div class="flex flex-row items-center gap-4 mr-4 mb-4">
+            <Button
+              variant="secondary"
+              class="p-2"
+              @click.stop="handleVote(true)"
+              aria-label="Upvote"
+            >
+              <ThumbsUp
+                :class="`h-4 w-4 mr-2 ${votes.has_voted && votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground ' : ''} ${isAnimatingLike ? 'animate-ping' : ''}`"
               />
-              <Button @click="handleAddComment(idea.id)">Comment</Button>
+              <span class="text-xl font-bold">{{ votes.upvotes }}</span>
+            </Button>
+            <Button
+              variant="secondary"
+              class="p-2"
+              @click.stop="handleVote(false)"
+              aria-label="Downvote"
+            >
+              <ThumbsDown
+                :class="`h-4 w-4 mr-2 ${votes.has_voted && !votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground' : ''} ${isAnimatingDislike ? 'animate-ping' : ''}`"
+              />
+
+              <span class="text-xl font-bold">{{ votes.downvotes }}</span>
+            </Button>
+            <Button variant="secondary" class="p-2">
+              <MessageSquare class="h-4 w-4 mr-1" />
+              <span>{{ idea.comments.length }} comments</span>
+            </Button>
+          </div>
+          <Separator class="my-4" />
+          <div v-if="shouldShowComments" class="space-y-2">
+            <div
+              v-for="(comment, index) in idea.comments"
+              :key="index"
+              class="bg-secondary p-2 rounded-md"
+            >
+              {{ comment }}
             </div>
           </div>
+          <div class="flex gap-2 mt-4">
+            <CommentForm
+              :idea_id="idea.id"
+              :popup-open="
+                () => {
+                  open = true;
+                }
+              "
+            />
+          </div>
         </div>
-      </CardContent>
-    </RouterLink>
+      </div>
+    </CardContent>
     <AlertDialog v-model:open="open">
       <AlertDialogTrigger class="opacity-0 hidden">opor</AlertDialogTrigger>
       <AlertDialogContent>

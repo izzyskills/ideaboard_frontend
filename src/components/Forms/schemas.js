@@ -38,5 +38,8 @@ const idea_schema = z.object({
   }, "Invalid category id"),
   project_id: z.string().uuid("Invalid project id"),
 });
+const comment_schmea = z.object({
+  content: z.string().min(2, "Comment must be at least 2 characters"),
+});
 
-export { login_schema, signup_schema, idea_schema };
+export { login_schema, signup_schema, idea_schema, comment_schmea };

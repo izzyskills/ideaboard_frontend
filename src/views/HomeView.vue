@@ -11,14 +11,11 @@ import { Loader2 } from "lucide-vue-next";
 
 const route = useRoute();
 const searchText = ref(route.query.text || "");
-const { ideas, error } = useGetIdeas();
+const { ideas, error } = useGetIdeas(searchText, null);
 const newComments = reactive({});
-const { postLike } = usePostLike();
-const { getAllProjects } = useGetAllProjects();
 
 const triggerEl = ref();
 const timer = ref(null);
-const isLoading = ref(false);
 
 const observer = new IntersectionObserver(
   (entries) => {

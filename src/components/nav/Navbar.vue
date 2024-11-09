@@ -24,12 +24,20 @@ const isNotLoginOrRegister = computed(() => {
 const updateQuery = debounce((text) => {
   router.push({ query: { text } });
   // Call your API query function here if needed
-  useGetIdeas();
-}, 500); // Adjust the debounce delay as needed
+}, 1000); // Adjust the debounce delay as needed
+
+searchText.value = route.query.text || "";
+watch(
+  () => route.query.text,
+  (newText) => {
+    searchText.value = newText || "";
+  },
+);
 
 watch(searchText, (newText) => {
   updateQuery(newText);
 });
+// Watch searchText and update searchParams in useGetIdeas
 const { isLoggedIn } = useAuth();
 const { logout } = useLogout();
 const handleLogout = async () => {

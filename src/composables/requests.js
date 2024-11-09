@@ -123,19 +123,19 @@ function useLogout() {
 //TODO: fix when a text is entered in the search bar and the results are not displayed
 //TODO: triggering get new ideas fetch if there is a next cursor and the user scrolls to the bottom of the page
 
-function useGetIdeas(project_id = null) {
+function useGetIdeas(searchParams = null, project_id = null) {
   const error = ref(null);
-  const searchParams = useUrlSearchParams();
+
+  console.log("Search params:", searchParams);
+  console.log("Project id:", project_id);
   const { isLoggedIn } = useAuth();
-  console.log(isLoggedIn.value);
   const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
-  console.log(apiSpecialClient);
 
   const getIdeas = useInfiniteQuery({
     queryKey: ["ideas", project_id, searchParams], // Add project_id and searchParams to queryKey to react to changes
     queryFn: async ({ pageParam = null }) => {
       try {
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams();
         if (pageParam) {
           params.set("cursor", pageParam);
         }
@@ -143,14 +143,14 @@ function useGetIdeas(project_id = null) {
         if (project_id) {
           params.set("project_id", project_id); // Include project_id in the query parameters if provided
         }
-        console.log("Making request with params:", Object.fromEntries(params));
+        if (searchParams?.value) {
+          params.set("text", searchParams.value);
+        }
+        console.log("Making request with params:", params);
 
         const response = await apiSpecialClient.get("/ideas", {
           params: params,
-          withCredentials: true,
         });
-        console.log("Response:", response);
-
         // Map the response data to the expected format
         const mappedData = response.data?.items.map((idea) => ({
           id: idea.id,
@@ -364,6 +364,30 @@ function usePostLike(idea_id) {
   };
 }
 
+function usePostComment(idea_id) {
+  const error = ref(null);
+  const apiClientPrivate = useAxiosPrivate();
+  const postComment = useMutation({
+    mutationFn: async (formData) => {
+      const res = await apiClientPrivate.post(
+        `ideas/${idea_id}/comment`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      return res.data;
+    },
+    onError: (err) => {
+      err.response?.data?.error_code ||
+        "An error occurred during comment creation";
+    },
+  });
+  return { postComment, error };
+}
+
 export {
   useSignup,
   useLogin,
@@ -376,4 +400,5 @@ export {
   usePostProject,
   useGetVotesDetails,
   usePostLike,
+  usePostComment,
 };
