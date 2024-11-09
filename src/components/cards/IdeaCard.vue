@@ -10,8 +10,21 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-vue-next";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { usePostLike } from "@/composables/requests";
+import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 const { idea, handleAddComment, newComments, shouldShowComments } = defineProps(
   {
     idea: Object,
@@ -23,16 +36,53 @@ const { idea, handleAddComment, newComments, shouldShowComments } = defineProps(
     },
   },
 );
+const router = useRouter();
 
-console.log(idea);
-//TODO: implement a way to show if a user liked an idea
-//TODO: implement a way to update the number of likes and dislikes on the UI
-//TODO: implement way to show a popup if a user is not authenticated and tries to like an idea
 const { postLike, error } = usePostLike(idea.id);
+const isAnimatingLike = ref(false);
+const isAnimatingDislike = ref(false);
+const votes = ref({
+  upvotes: idea.upvotes,
+  downvotes: idea.downvotes,
+  is_upvote: idea.is_upvote,
+  has_voted: idea.has_voted,
+});
+const { isLoggedIn } = useAuth();
+const open = ref(false);
+
+const redirectToLogin = () => {
+  const currentPath = window.location.pathname;
+  router.push({ name: "login", query: { from: currentPath } });
+};
 const handleVote = async (isUpvote) => {
+  console.log(isLoggedIn.value);
+  if (!isLoggedIn.value) {
+    open.value = true;
+    return;
+  }
   const formData = JSON.stringify({ is_upvote: isUpvote });
+  if (isUpvote) {
+    isAnimatingLike.value = true;
+    setTimeout(() => {
+      isAnimatingLike.value = false;
+    }, 1000);
+  } else {
+    isAnimatingDislike.value = false;
+
+    setTimeout(() => {
+      isAnimatingDislike.value = false;
+    }, 1000);
+  }
+
   const res = await postLike.mutateAsync(formData);
   console.log(res);
+  // Update the votes state based on the response
+  if (res) {
+    votes.value.upvotes = res.upvotes;
+    votes.value.downvotes = res.downvotes;
+    votes.value.is_upvote = res.is_upvote;
+    votes.value.has_voted = res.has_voted;
+  }
 };
 </script>
 <template>
@@ -61,8 +111,10 @@ const handleVote = async (isUpvote) => {
                 @click="handleVote(true)"
                 aria-label="Upvote"
               >
-                <ThumbsUp class="h-4 w-4 mr-2" />
-                <span class="text-xl font-bold">{{ idea.upvotes }}</span>
+                <ThumbsUp
+                  :class="`h-4 w-4 mr-2 ${votes.has_voted && votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground ' : ''} ${isAnimatingLike ? 'animate-ping' : ''}`"
+                />
+                <span class="text-xl font-bold">{{ votes.upvotes }}</span>
               </Button>
               <Button
                 variant="secondary"
@@ -70,8 +122,11 @@ const handleVote = async (isUpvote) => {
                 @click="handleVote(false)"
                 aria-label="Downvote"
               >
-                <ThumbsDown class="h-4 w-4 mr-2" />
-                <span class="text-xl font-bold">{{ idea.downvotes }}</span>
+                <ThumbsDown
+                  :class="`h-4 w-4 mr-2 ${votes.has_voted && !votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground' : ''} ${isAnimatingDislike ? 'animate-ping' : ''}`"
+                />
+
+                <span class="text-xl font-bold">{{ votes.downvotes }}</span>
               </Button>
               <Button variant="secondary" class="p-2">
                 <MessageSquare class="h-4 w-4 mr-1" />
@@ -101,5 +156,23 @@ const handleVote = async (isUpvote) => {
         </div>
       </CardContent>
     </RouterLink>
+    <AlertDialog v-model:open="open">
+      <AlertDialogTrigger class="opacity-0 hidden">opor</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>You are not Logged In</AlertDialogTitle>
+          <AlertDialogDescription>
+            You cannot interact with this idea without logging in. Please log in
+            to continue.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction @click="redirectToLogin"
+            >Continue</AlertDialogAction
+          >
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </Card>
 </template>

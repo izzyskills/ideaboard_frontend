@@ -12,7 +12,6 @@ import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useAxiosPrivate } from "@/composables/useAxiosPrivate";
 import { useUrlSearchParams } from "@vueuse/core";
-import { useProjectStore } from "@/stores/projecState";
 import { useProject } from "./useProject";
 
 function useLogin() {
@@ -110,6 +109,7 @@ function useLogout() {
       setAuth({});
       queryClient.invalidateQueries();
       router.push("/", { replace: true });
+      localStorage.removeItem("authState");
     },
     onError: (err) => {
       console.error("Lougout error: ", err);
@@ -126,6 +126,10 @@ function useLogout() {
 function useGetIdeas(project_id = null) {
   const error = ref(null);
   const searchParams = useUrlSearchParams();
+  const { isLoggedIn } = useAuth();
+  console.log(isLoggedIn.value);
+  const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
+  console.log(apiSpecialClient);
 
   const getIdeas = useInfiniteQuery({
     queryKey: ["ideas", project_id, searchParams], // Add project_id and searchParams to queryKey to react to changes
@@ -141,7 +145,7 @@ function useGetIdeas(project_id = null) {
         }
         console.log("Making request with params:", Object.fromEntries(params));
 
-        const response = await apiClient.get("/ideas", {
+        const response = await apiSpecialClient.get("/ideas", {
           params: params,
           withCredentials: true,
         });
@@ -158,6 +162,8 @@ function useGetIdeas(project_id = null) {
           comments: [], // Assuming comments are not included in the response
           project_name: idea.project_name,
           project_id: idea.project_id,
+          has_voted: idea.user_vote?.has_voted,
+          is_upvote: idea.user_vote?.is_upvote,
         }));
         console.log("Mapped data:", mappedData);
 
@@ -192,10 +198,15 @@ function useGetIdeas(project_id = null) {
 
 function useGetIdeabyId(id) {
   const error = ref(null);
+  const { isLoggedIn } = useAuth();
+  console.log(isLoggedIn.value);
+  const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
+  console.log(apiClient);
+  console.log(apiSpecialClient);
   const getIdeabyId = useQuery({
     queryKey: ["idea", id],
     queryFn: async () => {
-      const res = await apiClient.get(`ideas/${id}`);
+      const res = await apiSpecialClient.get(`ideas/${id}`);
       const idea = res.data;
       console.log(idea);
       const mappedData = {
@@ -208,8 +219,9 @@ function useGetIdeabyId(id) {
         comments: [], // Assuming comments are not included in the response
         project_name: idea.project_name,
         project_id: idea.project_id,
+        has_voted: idea.user_vote?.has_voted,
+        is_upvote: idea.user_vote?.is_upvote,
       };
-      console.log(mappedData);
       return { data: mappedData };
     },
     staleTime: 1000 * 60 * 5,
@@ -308,7 +320,7 @@ function useGetProjectByid(project_id) {
 function useGetVotesDetails(idea_id) {
   const error = ref(null);
   const { isLoggedIn } = useAuth();
-  const apiSpecialClient = isLoggedIn ? useAxiosPrivate() : apiClient;
+  const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
   const getVotesDetails = useQuery({
     queryKey: ["votes", idea_id],
     queryFn: async () => {
@@ -322,6 +334,7 @@ function useGetVotesDetails(idea_id) {
 function usePostLike(idea_id) {
   const error = ref(null);
   const apiClientPrivate = useAxiosPrivate();
+
   const postLike = useMutation({
     mutationFn: async (formData) => {
       const res = await apiClientPrivate.post(
@@ -333,13 +346,15 @@ function usePostLike(idea_id) {
           },
         },
       );
-      return res.data;
+      return res.data; // This becomes the mutation data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries(["votes", idea_id]);
+      return data;
     },
     onError: (err) => {
-      err.response?.data?.error_code || "An error occurred during signup";
+      error.value =
+        err.response?.data?.error_code || "An error occurred during voting";
     },
   });
 
@@ -348,6 +363,7 @@ function usePostLike(idea_id) {
     error,
   };
 }
+
 export {
   useSignup,
   useLogin,

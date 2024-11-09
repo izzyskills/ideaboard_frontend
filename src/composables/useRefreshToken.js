@@ -6,7 +6,7 @@ export function useRefreshToken() {
 
   const refresh = async () => {
     try {
-      const response = await apiClient.get("users/refresh", {
+      const response = await apiClient.get("auth/refresh_token", {
         withCredentials: true,
       });
       setAuth((prev) => ({

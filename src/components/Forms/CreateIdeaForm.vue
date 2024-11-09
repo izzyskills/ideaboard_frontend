@@ -38,6 +38,7 @@ import { PlusCircledIcon } from "@radix-icons/vue";
 import { useProject } from "@/composables/useProject";
 import { useCategory } from "@/composables/useCategory";
 import { useAuth } from "@/composables/useAuth";
+import { usePostIdea } from "@/composables/requests";
 
 const isLoading = ref(false);
 const formSchema = toTypedSchema(idea_schema);
@@ -51,6 +52,7 @@ const { handleSubmit, setFieldValue, values } = useForm({
   },
 });
 
+const { postIdea } = usePostIdea();
 const open = ref(false);
 const { getUser } = useAuth();
 
@@ -61,29 +63,22 @@ const onSubmit = handleSubmit(async (values) => {
     isLoading.value = true;
     values.category_id = Number(values.category_id);
     values.creator_id = getUser.value.user_id;
-
-    // await createIdea.mutateAsync(values);
     console.log(values);
+
+    await postIdea.mutateAsync(values);
+    open.value = false;
   } catch (error) {
     console.error(error);
   } finally {
     isLoading.value = false;
-    open.value = false;
   }
 });
 </script>
 <template>
   <div>
-    <Dialog :open="open">
+    <Dialog v-model:open="open">
       <DialogTrigger as-child>
-        <Button
-          @click="
-            () => {
-              open = true;
-            }
-          "
-          class="gap-x-2"
-        >
+        <Button class="gap-x-2">
           <PlusCircledIcon class="" />
           Create Idea
         </Button>
@@ -151,7 +146,9 @@ const onSubmit = handleSubmit(async (values) => {
               </FormItem>
             </FormField>
             <DialogFooter class="mt-8">
-              <Button type="submit">Submit Idea</Button>
+              <Button :disabled="isLoading" type="submit">{{
+                isLoading ? `Submitting Idea...` : `Submit Idea`
+              }}</Button>
             </DialogFooter>
           </CardContent>
         </form>

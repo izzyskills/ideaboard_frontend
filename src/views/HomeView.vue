@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
 import {
   useGetAllProjects,
@@ -16,18 +16,36 @@ const newComments = reactive({});
 const { postLike } = usePostLike();
 const { getAllProjects } = useGetAllProjects();
 
+const triggerEl = ref();
+const timer = ref(null);
+const isLoading = ref(false);
+
+const observer = new IntersectionObserver(
+  (entries) => {
+    if (entries[0].isIntersecting) {
+      clearTimeout(timer.value);
+      timer.value = setTimeout(() => {
+        if (ideas.hasNextPage.value) {
+          ideas.fetchNextPage();
+        }
+      }, 300);
+    }
+  },
+  { threshold: 1 },
+);
+
+onMounted(() => {
+  observer.observe(triggerEl.value);
+});
+onUnmounted(() => {
+  observer.disconnect();
+});
+
 // Compute flattened ideas using computed property
 
 const handleAddComment = (id) => {
   console.log("Adding comment for idea:", id);
 };
-
-watch(
-  () => getAllProjects.data.value,
-  (data) => {
-    console.log(data);
-  },
-);
 
 // Watch for route changes
 watch(
@@ -55,21 +73,15 @@ watch(
       />
     </div>
 
-    <button
-      v-if="ideas.hasNextPage"
-      @click="() => ideas.fetchNextPage()"
-      class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-      :disabled="ideas.isFetchingNextPage"
-    >
-      {{ ideas.isFetchingNextPage ? "Loading more..." : "Load More" }}
-    </button>
-
-    <!-- Show loader for initial load only -->
+    <div ref="triggerEl"></div>
     <div
-      v-if="ideas.isLoading && !ideas.data"
-      class="flex w-full justify-center items-center text-center"
+      v-if="ideas.isFetchingNextPage.value && ideas.hasNextPage.value"
+      class="flex w-full justify-center items-center text-center mt-4"
     >
       <Loader2 class="h-10 w-10 animate-spin" />
+    </div>
+    <div v-if="!ideas.hasNextPage.value">
+      <p class="text-center mt-4">No more ideas to load</p>
     </div>
   </div>
 </template>
