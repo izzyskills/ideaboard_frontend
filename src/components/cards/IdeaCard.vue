@@ -26,6 +26,8 @@ import { usePostLike } from "@/composables/requests";
 import { ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
 import CommentForm from "../Forms/CommentForm.vue";
+import CommentCard from "./CommentCard.vue";
+import { formatLikeCount, formatTimeElapsed } from "@/lib/utils";
 const { idea, newComments, shouldShowComments } = defineProps({
   idea: Object,
   shouldShowComments: {
@@ -99,11 +101,25 @@ const handleVote = async (isUpvote) => {
 <template>
   <Card @click="navigateToIdea" class="w-full cursor-pointer">
     <CardHeader class="gap-0">
-      <CardTitle
-        @click.stop="navigateToProject"
-        class="text-xs cursor-pointer"
-        >{{ idea.project_name }}</CardTitle
-      >
+      <div class="flex w-full items-start justify-between mb-2">
+        <CardTitle
+          @click.stop="navigateToProject"
+          class="text-xs cursor-pointer"
+          >{{ idea.project_name }}</CardTitle
+        >
+        <span class="text-xs text-gray-600"
+          >{{ formatTimeElapsed(idea.created_at) }} ago</span
+        >
+      </div>
+      <div class="flex flex-wrap gap-2 mb-2">
+        <div
+          v-for="category_name in idea.category_names"
+          :key="category_name"
+          class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground"
+        >
+          #{{ category_name }}
+        </div>
+      </div>
       <CardDescription class="text-[0.7rem]"
         >Posted by {{ idea.author }}</CardDescription
       >
@@ -124,7 +140,9 @@ const handleVote = async (isUpvote) => {
               <ThumbsUp
                 :class="`h-4 w-4 mr-2 ${votes.has_voted && votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground ' : ''} ${isAnimatingLike ? 'animate-ping' : ''}`"
               />
-              <span class="text-xl font-bold">{{ votes.upvotes }}</span>
+              <span class="text-xl font-bold">{{
+                formatLikeCount(votes.upvotes)
+              }}</span>
             </Button>
             <Button
               variant="secondary"
@@ -136,22 +154,25 @@ const handleVote = async (isUpvote) => {
                 :class="`h-4 w-4 mr-2 ${votes.has_voted && !votes.is_upvote ? 'fill-secondary-foreground stroke-secondary-foreground' : ''} ${isAnimatingDislike ? 'animate-ping' : ''}`"
               />
 
-              <span class="text-xl font-bold">{{ votes.downvotes }}</span>
+              <span class="text-xl font-bold">{{
+                formatLikeCount(votes.downvotes)
+              }}</span>
             </Button>
             <Button variant="secondary" class="p-2">
-              <MessageSquare class="h-4 w-4 mr-1" />
-              <span>{{ idea.comments.length }} comments</span>
+              <MessageSquare
+                :class="`h-4 w-4 mr-1 ${idea.has_commented ? `fill-secondary-foreground stroke-secondary-foreground` : ``}`"
+              />
+              <span>{{ idea.comments_count }} comments</span>
             </Button>
           </div>
           <Separator class="my-4" />
           <div v-if="shouldShowComments" class="space-y-2">
-            <div
-              v-for="(comment, index) in idea.comments"
-              :key="index"
-              class="bg-secondary p-2 rounded-md"
-            >
-              {{ comment }}
-            </div>
+            <CommentCard
+              v-for="comment in idea.comments"
+              :key="comment.id"
+              :comment="comment"
+              class="p-1 bg-secondary"
+            />
           </div>
           <div class="flex gap-2 mt-4">
             <CommentForm

@@ -22,9 +22,12 @@ const isNotLoginOrRegister = computed(() => {
   return route.path !== "/login" && route.path !== "/register";
 });
 const updateQuery = debounce((text) => {
-  router.push({ query: { text } });
-  // Call your API query function here if needed
-}, 1000); // Adjust the debounce delay as needed
+  if (route.name === "idea") {
+    router.push({ path: "/", query: { text } });
+  } else {
+    router.push({ query: { text } });
+  }
+}, 1000);
 
 searchText.value = route.query.text || "";
 watch(

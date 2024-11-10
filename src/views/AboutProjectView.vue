@@ -63,10 +63,10 @@ watch(
       :description="project.data.value.description"
       :open_soure_link="project.data.value.url"
     />
-    <div class="flex mb-4 gap-4">
-      <CategorySelectionForm />
-      <SortButton />
-    </div>
+    <!-- <div class="flex mb-4 gap-4"> -->
+    <!--   <CategorySelectionForm /> -->
+    <!--   <SortButton /> -->
+    <!-- </div> -->
     <Separator class="mb-4" />
     <div v-if="ideas.data.value" class="space-y-4">
       <IdeaCard

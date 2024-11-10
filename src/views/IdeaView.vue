@@ -1,19 +1,11 @@
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
 import IdeaCard from "@/components/cards/IdeaCard.vue";
 import { useRoute } from "vue-router";
-import { Loader2 } from "lucide-vue-next";
 import CommentCard from "@/components/cards/CommentCard.vue";
 import { useGetIdeabyId } from "@/composables/requests";
 
-const route = useRoute();
 const idea_id = useRoute().params.id;
-const searchText = ref(route.query.text || "");
-const newComments = reactive({});
 const { getIdeabyId, error } = useGetIdeabyId(idea_id);
-const handleAddComment = (id) => {
-  console.log("Adding comment for idea:", id);
-};
 </script>
 <template>
   <div class="container mx-auto p-4 max-w-4xl">
@@ -27,10 +19,7 @@ const handleAddComment = (id) => {
     <div v-if="getIdeabyId.data.value && !error" class="space-y-4 mb-4">
       <IdeaCard
         :idea="getIdeabyId.data.value.data"
-        :handle-add-comment="handleAddComment"
-        :new-comments="newComments"
         :should-show-comments="false"
-        :should-link="false"
       />
     </div>
     <h2 className="text-xl font-semibold mb-4">Comments</h2>
@@ -39,6 +28,7 @@ const handleAddComment = (id) => {
         v-for="comment in getIdeabyId.data.value?.data.comments"
         :key="comment.id"
         :comment="comment"
+        class="p-4"
       />
     </div>
   </div>

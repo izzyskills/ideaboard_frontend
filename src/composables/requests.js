@@ -159,11 +159,15 @@ function useGetIdeas(searchParams = null, project_id = null) {
           upvotes: idea.votes.upvotes,
           downvotes: idea.votes.downvotes,
           author: idea.creator_username, // Assuming creator_id is the author
-          comments: [], // Assuming comments are not included in the response
+          created_at: idea.created_at,
+          comments: idea.comments,
+          comments_count: idea.comments_count,
+          has_commented: idea.has_commented,
           project_name: idea.project_name,
           project_id: idea.project_id,
           has_voted: idea.user_vote?.has_voted,
           is_upvote: idea.user_vote?.is_upvote,
+          category_names: idea.category_names,
         }));
         console.log("Mapped data:", mappedData);
 
@@ -216,11 +220,15 @@ function useGetIdeabyId(id) {
         upvotes: idea.votes.upvotes,
         downvotes: idea.votes.downvotes,
         author: idea.creator_username, // Assuming creator_id is the author
-        comments: [], // Assuming comments are not included in the response
+        created_at: idea.created_at,
+        comments: idea.comments,
+        comments_count: idea.comments_count,
+        has_commented: idea.has_commented,
         project_name: idea.project_name,
         project_id: idea.project_id,
         has_voted: idea.user_vote?.has_voted,
         is_upvote: idea.user_vote?.is_upvote,
+        category_names: idea.category_names,
       };
       return { data: mappedData };
     },
