@@ -1,12 +1,14 @@
 import { onMounted, onUnmounted } from "vue";
-import { useRefreshToken } from "./UseRefreshToken";
+import { useRouter, useRoute } from "vue-router";
+import { useRefreshToken } from "./useRefreshToken";
 import { useAuth } from "./useAuth";
 import { apiClientPrivate } from "./apiClient";
-// Todo: Add useAxiosPrivate function
 
 export function useAxiosPrivate() {
   const refresh = useRefreshToken();
   const { setAuth, authstate } = useAuth();
+  const router = useRouter();
+  const route = useRoute();
 
   let requestIntercept = null;
   let responseIntercept = null;
@@ -32,6 +34,7 @@ export function useAxiosPrivate() {
             const newAccessToken = await refresh();
             if (!newAccessToken) {
               setAuth({});
+              router.push({ name: "login", query: { from: route.fullPath } });
               return Promise.reject(error);
             }
             prevRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
@@ -39,6 +42,7 @@ export function useAxiosPrivate() {
           } catch (refreshError) {
             console.error("Error refreshing access token:", refreshError);
             setAuth({});
+            router.push({ name: "login", query: { from: route.fullPath } });
             return Promise.reject(error);
           }
         }

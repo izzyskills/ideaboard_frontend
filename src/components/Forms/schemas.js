@@ -42,4 +42,16 @@ const comment_schmea = z.object({
   content: z.string().min(2, "Comment must be at least 2 characters"),
 });
 
-export { login_schema, signup_schema, idea_schema, comment_schmea };
+const project_schema = z.object({
+  name: z.string().min(2, "Project Name must be at least 2 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  url: z.string().url("Invalid URL"),
+});
+
+export {
+  login_schema,
+  signup_schema,
+  idea_schema,
+  comment_schmea,
+  project_schema,
+};

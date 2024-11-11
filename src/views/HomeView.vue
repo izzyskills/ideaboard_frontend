@@ -8,6 +8,7 @@ import {
 } from "@/composables/requests";
 import { useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
+import CreateProjectForm from "@/components/Forms/CreateProjectForm.vue";
 
 const route = useRoute();
 const searchText = ref(route.query.text || "");

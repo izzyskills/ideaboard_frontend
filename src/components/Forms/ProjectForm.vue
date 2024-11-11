@@ -25,6 +25,7 @@ import {
 
 import { CaretDownIcon, CheckIcon } from "@radix-icons/vue";
 import { cn } from "@/lib/utils";
+import CreateProjectForm from "./CreateProjectForm.vue";
 
 const { previousProjects, setFieldValue, values } = defineProps({
   previousProjects: Array,
@@ -65,8 +66,8 @@ const { previousProjects, setFieldValue, values } = defineProps({
           <Command>
             <CommandInput placeholder="Select Projects..." />
             <CommandEmpty>
-              <RouterLink to="#"> Create Project </RouterLink></CommandEmpty
-            >
+              <CreateProjectForm />
+            </CommandEmpty>
             <CommandList>
               <CommandGroup>
                 <CommandItem

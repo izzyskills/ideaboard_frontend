@@ -1,4 +1,4 @@
-import { apiClient } from "./apiClient";
+import { apiClientPrivate } from "./apiClient";
 import { useAuth } from "./useAuth";
 
 export function useRefreshToken() {
@@ -6,7 +6,7 @@ export function useRefreshToken() {
 
   const refresh = async () => {
     try {
-      const response = await apiClient.get("auth/refresh_token", {
+      const response = await apiClientPrivate.get("auth/refresh_token", {
         withCredentials: true,
       });
       setAuth((prev) => ({
