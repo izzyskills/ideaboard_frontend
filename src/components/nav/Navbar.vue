@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { RouterLink, useRoute } from "vue-router";
 import DarkMode from "@/components/nav/DarkMode.vue";
 import MenuIcon from "@/components/icons/MenuIcon.vue";
-import MountainIcon from "@/components/icons/MountainIcon.vue";
 import { Input } from "@/components/ui/input";
 import { MagnifyingGlassIcon } from "@radix-icons/vue";
 import CreateIdeaForm from "@/components/Forms/CreateIdeaForm.vue";
@@ -64,8 +63,8 @@ const handleLogout = async () => {
       </SheetTrigger>
       <SheetContent side="left">
         <RouterLink to="/" class="mr-6 flex mb-4">
-          <MountainIcon class="h-6 w-6" />
-          <span class="sr-only">Idea Board</span>
+          <img src="../../assets/icon.png" class="h-8 w-8 mr-2" />
+          <span class="">Idea Board</span>
         </RouterLink>
         <div v-if="isNotLoginOrRegister" class="relative w-full items-center">
           <Input
@@ -106,7 +105,7 @@ const handleLogout = async () => {
     </Sheet>
     <RouterLink to="/" class="flex items-center">
       <div class="hidden lg:inline-flex min-w-40 gap-2 mr-6">
-        <MountainIcon class="h-6 w-6" />
+        <img src="../../assets/icon.png" class="h-8 w-8 mr-2" />
         <span class="">Idea Board</span>
       </div>
     </RouterLink>

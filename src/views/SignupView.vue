@@ -3,7 +3,6 @@ import RegisterForm from "@/components/Forms/RegisterForm.vue";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { RouterLink } from "vue-router";
-import { MountainIcon } from "lucide-vue-next";
 </script>
 
 <template>
@@ -30,7 +29,7 @@ import { MountainIcon } from "lucide-vue-next";
       <div
         class="relative z-20 flex items-center text-lg font-medium text-primary"
       >
-        <MountainIcon class="h-8 w-8 mr-2" />
+        <img src="../assets/icon.png" class="h-8 w-8 mr-2" />
         Idea Board
       </div>
       <div class="relative z-20 mt-auto text-primary">
