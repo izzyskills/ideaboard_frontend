@@ -12,19 +12,23 @@ import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useAxiosPrivate } from "@/composables/useAxiosPrivate";
 import { useProject } from "./useProject";
+import { handleErrors } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 function useLogin() {
   const router = useRouter();
   const route = useRoute();
   const from = route.query.from || "/";
   const { setAuth } = useAuth();
+  const { toast } = useToast();
   const error = ref(null);
   const login = useMutation({
     mutationFn: (formData) => {
-      return apiClientPrivate.post("auth/login", formData, {
+      return apiClient.post("auth/login", formData, {
         headers: {
           "Content-Type": "application/json",
         },
+        withCredentials: true,
       });
     },
     onSuccess: (res) => {
@@ -33,9 +37,11 @@ function useLogin() {
       const user = decodedToken.user;
       setAuth({ user, token });
       queryClient.invalidateQueries(["userdata", user.uid]);
+      toast({ description: "Login successful" });
       router.push(from, { replace: true });
     },
     onError: (err) => {
+      console.log("Login error:", err);
       if (axios.isAxiosError(err) && err.response) {
         const { data } = err.response;
         if (data && data.error_code === "invalid_email_or_password") {
@@ -48,6 +54,7 @@ function useLogin() {
       } else {
         error.value = "An unexpected error occurred";
       }
+      handleErrors(err);
       console.error("Login error:", err);
     },
   });
@@ -61,7 +68,7 @@ function useLogin() {
 function useSignup() {
   const router = useRouter();
   const error = ref(null);
-
+  const { toast } = useToast();
   const signup = useMutation({
     mutationFn: async (formData) => {
       const response = await apiClient.post(`auth/register`, formData, {
@@ -77,9 +84,15 @@ function useSignup() {
         error.value = "Invalid response from server";
         return;
       }
-      queryClient.invalidateQueries("userdata");
+      queryClient.invalidateQueries();
       // Note: You'll need to implement a toast notification system for Vue
-      err.response?.data?.error_code || "An error occurred during signup";
+      toast({ description: "Signup successful" });
+      router.push("/login");
+    },
+    onError: (err) => {
+      handleErrors(err);
+      error.value =
+        err.response?.data?.error_code || "An error occurred during signup";
     },
   });
 
@@ -113,6 +126,7 @@ function useLogout() {
       console.error("Lougout error: ", err);
       error.value =
         err.response?.data?.error_code || "an arror occured during logging out";
+      handleErrors(err);
     },
   });
   return { error, logout };
@@ -246,6 +260,7 @@ function usePostIdea() {
     onError: (err) => {
       err.response?.data?.error_code ||
         "An error occurred during idea creation";
+      handleErrors(err);
     },
   });
   return {
@@ -277,6 +292,7 @@ function usePostProject() {
     onError: (err) => {
       err.response?.data?.error_code ||
         "An error occurred during project creation";
+      handleErrors(err);
     },
   });
   return {
@@ -350,12 +366,14 @@ function usePostLike(idea_id) {
       return res.data; // This becomes the mutation data
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["votes", idea_id]);
+      queryClient.invalidateQueries(["idea", idea_id]);
+      queryClient.invalidateQueries(["ideas"]);
       return data;
     },
     onError: (err) => {
       error.value =
         err.response?.data?.error_code || "An error occurred during voting";
+      handleErrors(err);
     },
   });
 
@@ -383,6 +401,7 @@ function usePostComment(idea_id) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["idea", idea_id]);
+      queryClient.invalidateQueries(["ideas"]);
     },
     onError: (err) => {
       err.response?.data?.error_code ||

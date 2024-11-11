@@ -1,3 +1,4 @@
+import { useToast } from "@/components/ui/toast";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -54,5 +55,22 @@ export function formatTimeElapsed(dateTime) {
     return minutes + "m";
   } else {
     return seconds + "s";
+  }
+}
+
+export function handleErrors(error) {
+  const { toast } = useToast();
+  if (error.response?.data?.message) {
+    toast({
+      title: "Uh oh! Something went wrong.",
+      description: error.response.data.message,
+      variant: "destructive",
+    });
+  } else {
+    toast({
+      title: "Uh oh! Something went wrong.",
+      description: "Please try again later.",
+      variant: "destructive",
+    });
   }
 }

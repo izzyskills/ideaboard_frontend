@@ -63,10 +63,25 @@ const handleLogout = async () => {
         </Button>
       </SheetTrigger>
       <SheetContent side="left">
-        <RouterLink to="/" class="mr-6 hidden lg:flex">
+        <RouterLink to="/" class="mr-6 flex mb-4">
           <MountainIcon class="h-6 w-6" />
-          <span class="sr-only">Acme Inc</span>
+          <span class="sr-only">Idea Board</span>
         </RouterLink>
+        <div v-if="isNotLoginOrRegister" class="relative w-full items-center">
+          <Input
+            id="search"
+            type="text"
+            v-model="searchText"
+            placeholder="Search..."
+            class="pl-10"
+          />
+          <span
+            class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
+          >
+            <MagnifyingGlassIcon class="size-6 text-muted-foreground" />
+          </span>
+        </div>
+
         <div v-if="isLoggedIn" class="grid gap-2 py-6">
           <Button @click="handleLogout" variant="destructive" size="sm">
             <Loader2
@@ -75,7 +90,6 @@ const handleLogout = async () => {
             />
             {{ logout.isLoading ? "Logging out..." : "Logout" }}
           </Button>
-          <DarkMode />
         </div>
 
         <div v-else="isLoggedIn" class="grid gap-2 py-6">
@@ -85,24 +99,12 @@ const handleLogout = async () => {
           <Button class="text-left" size="sm">
             <RouterLink class="text-left" to="signup"> Register </RouterLink>
           </Button>
-          <RouterLink
-            to="#"
-            class="flex w-full items-center py-2 text-lg font-semibold"
-          >
-            Home
-          </RouterLink>
-          <RouterLink
-            to="#"
-            class="flex w-full items-center py-2 text-lg font-semibold"
-          >
-            About
-          </RouterLink>
         </div>
         <DarkMode />
       </SheetContent>
     </Sheet>
     <RouterLink to="/" class="flex items-center">
-      <div class="lg:inline-flex min-w-40 gap-2 mr-6">
+      <div class="hidden lg:inline-flex min-w-40 gap-2 mr-6">
         <MountainIcon class="h-6 w-6" />
         <span class="">Idea Board</span>
       </div>
