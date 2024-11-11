@@ -78,7 +78,7 @@ const onSubmit = handleSubmit(async (values) => {
   <div>
     <Dialog v-model:open="open">
       <DialogTrigger as-child>
-        <Button class="gap-x-2">
+        <Button class="gap-x-2 w-full">
           <PlusCircledIcon class="" />
           Create Idea
         </Button>

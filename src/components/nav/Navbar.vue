@@ -83,6 +83,7 @@ const handleLogout = async () => {
         </div>
 
         <div v-if="isLoggedIn" class="grid gap-2 py-6">
+          <CreateIdeaForm class="inline-flex w-full" />
           <Button @click="handleLogout" variant="destructive" size="sm">
             <Loader2
               v-if="logout.isLoading"
