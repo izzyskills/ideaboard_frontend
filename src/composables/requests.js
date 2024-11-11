@@ -1,5 +1,5 @@
 import { useAuth } from "@/composables/useAuth";
-import { apiClient, queryClient } from "./apiClient";
+import { apiClient, apiClientPrivate, queryClient } from "./apiClient";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -11,7 +11,6 @@ import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
 import { useAxiosPrivate } from "@/composables/useAxiosPrivate";
-import { useUrlSearchParams } from "@vueuse/core";
 import { useProject } from "./useProject";
 
 function useLogin() {
@@ -22,11 +21,10 @@ function useLogin() {
   const error = ref(null);
   const login = useMutation({
     mutationFn: (formData) => {
-      return apiClient.post("auth/login", formData, {
+      return apiClientPrivate.post("auth/login", formData, {
         headers: {
           "Content-Type": "application/json",
         },
-        withCredentials: true,
       });
     },
     onSuccess: (res) => {
@@ -126,8 +124,6 @@ function useLogout() {
 function useGetIdeas(searchParams = null, project_id = null) {
   const error = ref(null);
 
-  console.log("Search params:", searchParams);
-  console.log("Project id:", project_id);
   const { isLoggedIn } = useAuth();
   const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
 
@@ -146,7 +142,6 @@ function useGetIdeas(searchParams = null, project_id = null) {
         if (searchParams?.value) {
           params.set("text", searchParams.value);
         }
-        console.log("Making request with params:", params);
 
         const response = await apiSpecialClient.get("/ideas", {
           params: params,
@@ -169,7 +164,6 @@ function useGetIdeas(searchParams = null, project_id = null) {
           is_upvote: idea.user_vote?.is_upvote,
           category_names: idea.category_names,
         }));
-        console.log("Mapped data:", mappedData);
 
         return {
           data: mappedData,
@@ -188,7 +182,6 @@ function useGetIdeas(searchParams = null, project_id = null) {
   watch(
     searchParams,
     () => {
-      console.log("Search params changed, refetching...");
       getIdeas.refetch();
     },
     { deep: true },
@@ -203,16 +196,12 @@ function useGetIdeas(searchParams = null, project_id = null) {
 function useGetIdeabyId(id) {
   const error = ref(null);
   const { isLoggedIn } = useAuth();
-  console.log(isLoggedIn.value);
   const apiSpecialClient = isLoggedIn.value ? useAxiosPrivate() : apiClient;
-  console.log(apiClient);
-  console.log(apiSpecialClient);
   const getIdeabyId = useQuery({
     queryKey: ["idea", id],
     queryFn: async () => {
       const res = await apiSpecialClient.get(`ideas/${id}`);
       const idea = res.data;
-      console.log(idea);
       const mappedData = {
         id: idea.id,
         title: idea.title,
@@ -278,7 +267,12 @@ function usePostProject() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["prject", "all"]);
+      // Invalidate and refetch projects list
+      queryClient.invalidateQueries({
+        queryKey: ["project", "all"],
+        exact: true,
+        refetchType: "active",
+      });
     },
     onError: (err) => {
       err.response?.data?.error_code ||
@@ -314,7 +308,6 @@ function useGetProjectByid(project_id) {
     queryKey: ["project", project_id],
     queryFn: async () => {
       const res = await apiClient.get(`project/${project_id}`);
-      console.log(res.data);
       return res.data;
     },
     staleTime: 1000 * 60 * 20,
@@ -387,6 +380,9 @@ function usePostComment(idea_id) {
         },
       );
       return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["idea", idea_id]);
     },
     onError: (err) => {
       err.response?.data?.error_code ||

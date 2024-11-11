@@ -19,7 +19,7 @@ const searchText = ref("");
 const router = useRouter();
 const route = useRoute();
 const isNotLoginOrRegister = computed(() => {
-  return route.path !== "/login" && route.path !== "/register";
+  return route.path !== "/login" && route.path !== "/signup";
 });
 const updateQuery = debounce((text) => {
   if (route.name === "idea") {
