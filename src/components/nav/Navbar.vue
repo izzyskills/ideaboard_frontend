@@ -94,10 +94,10 @@ const handleLogout = async () => {
 
         <div v-else="isLoggedIn" class="grid gap-2 py-6">
           <Button variant="outline" size="sm">
-            <RouterLink to="login"> Login </RouterLink>
+            <RouterLink to="/login"> Login </RouterLink>
           </Button>
           <Button class="text-left" size="sm">
-            <RouterLink class="text-left" to="signup"> Register </RouterLink>
+            <RouterLink class="text-left" to="/signup"> Register </RouterLink>
           </Button>
         </div>
         <DarkMode />

@@ -8,6 +8,7 @@ import { onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useGetIdeas, useGetProjectByid } from "@/composables/requests";
 import { useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
+import GoBack from "@/components/nav/GoBack.vue";
 const project_id = useRoute().params.id;
 const { project, error: projectError } = useGetProjectByid(project_id);
 const newComments = reactive({});
@@ -56,6 +57,8 @@ watch(
 </script>
 <template>
   <div class="container mx-auto p-4">
+    <GoBack />
+    <h1 class="text-3xl font-bold mb-6">Idea Board</h1>
     <ProjectDescriptionCard
       v-if="project.data.value"
       :id="project.data.value.id"

@@ -9,6 +9,7 @@ import {
 import { useRoute } from "vue-router";
 import { Loader2 } from "lucide-vue-next";
 import CreateProjectForm from "@/components/Forms/CreateProjectForm.vue";
+import GoBack from "@/components/nav/GoBack.vue";
 
 const route = useRoute();
 const searchText = ref(route.query.text || "");
@@ -56,6 +57,7 @@ watch(
 </script>
 <template>
   <div class="container mx-auto p-4">
+    <GoBack />
     <h1 class="text-3xl font-bold mb-6">Ideas Board</h1>
 
     <div v-if="error" class="text-red-500">{{ error.message }}</div>
@@ -73,12 +75,15 @@ watch(
 
     <div ref="triggerEl"></div>
     <div
-      v-if="ideas.isFetchingNextPage.value && ideas.hasNextPage.value"
+      v-if="
+        ideas.isLoading ||
+        (ideas.isFetchingNextPage.value && ideas.hasNextPage.value)
+      "
       class="flex w-full justify-center items-center text-center mt-4"
     >
       <Loader2 class="h-10 w-10 animate-spin" />
     </div>
-    <div v-if="!ideas.hasNextPage.value">
+    <div v-if="!ideas.isLoading && !ideas.hasNextPage.value">
       <p class="text-center mt-4">No more ideas to load</p>
     </div>
   </div>
