@@ -76,14 +76,14 @@ watch(
     <div ref="triggerEl"></div>
     <div
       v-if="
-        ideas.isLoading ||
+        ideas.isLoading.value ||
         (ideas.isFetchingNextPage.value && ideas.hasNextPage.value)
       "
       class="flex w-full justify-center items-center text-center mt-4"
     >
       <Loader2 class="h-10 w-10 animate-spin" />
     </div>
-    <div v-if="!ideas.isLoading && !ideas.hasNextPage.value">
+    <div v-if="!ideas.isLoading.value && !ideas.hasNextPage.value">
       <p class="text-center mt-4">No more ideas to load</p>
     </div>
   </div>
